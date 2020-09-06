@@ -23,6 +23,7 @@
 				<p><strong>Email: </strong><span id="email"></span></p>
 				<p><strong>Tel: </strong><span id="tel"></span></p>
 				<p><strong>Group: </strong><span id="group"></span></p>
+				<p><strong>Language: </strong><span id="lang"></span></p>
 			</header>
 
 
@@ -52,6 +53,7 @@
 				$('#tel').html(session.get('tel'));
 				$('#email').html(session.get('email'));
 				$('#group').html(session.get('group'));
+				$('#lang').html(((session.get('lang'))?atob(session.get('lang')):''));
 				$('#update').show();
 				$('#logout').show();
 			});
@@ -80,6 +82,12 @@
                 	['<button><b>Email</b></button>', function (instance, toast) {
 			            instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
                         window.location.href = 'https://login.yimian.xyz/?require=email&from=https://user.yimian.xyz/';
+			        }, true],
+                	['<button><b>Reset Language</b></button>', function (instance, toast) {
+			            instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                        session.del('lang');
+                        session.del('nolang');
+                        $('#lang').html('');
 			        }, true],
 			    ['<button><b>close</b></button>', function (instance, toast) {
 			            instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
