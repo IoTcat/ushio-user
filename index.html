@@ -18,11 +18,14 @@
 
 		<!-- Header -->
 			<header id="header">
+
 				<h1 id="nickname"><span class=".zh">加载中..</span><span class=".en">Loading...</span></h1>
 				<p><strong><span class=".zh">账户id</span><span class=".en">Uid</span>: </strong><span id="uid"></span></p>
 				<p><strong><span class=".zh">邮箱</span><span class=".en">Email</span>: </strong><span id="email"></span></p>
 				<p><strong><span class=".zh">手机号</span><span class=".en">Tel</span>: </strong><span id="tel"></span></p>
 				<p><strong><span class=".zh">分组</span><span class=".en">Group</span>: </strong><span id="group"></span></p>
+				<p><strong><span class=".zh">语言</span><span class=".en">Language</span>: </strong><span id="lang"></span></p>
+
 			</header>
 
 
@@ -52,12 +55,28 @@
 				$('#tel').html(session.get('tel'));
 				$('#email').html(session.get('email'));
 				$('#group').html(session.get('group'));
+				$('#lang').html(((session.get('lang'))?atob(session.get('lang')):''));
 				$('#update').show();
 				$('#logout').show();
 			});
 
 
           $("#update").click(function(){
+          	if(page.tran.getLang() == 'zh'){
+          		var title = '更新信息';
+          		var nickname = '昵称';
+          		var tel = '手机号';
+          		var email = '邮箱';
+          		var lan = '重置语言偏好';
+          		var close = '关闭';
+          	}else{
+          		var title = 'Update Info';
+          		var nickname = 'Nickname';
+          		var tel = 'Tel';
+          		var email = 'Email';
+          		var lan = 'Reset Language Preference';
+          		var close = 'close';
+          	}
             tips.question({
 			    timeout: 20000,
 			    close: false,
@@ -65,23 +84,29 @@
 			    displayMode: 'once',
 			    //id: 'question',
 			    zindex: 999,
-			    title: 'Update',
+			    title: title,
 			    message: '',
 			    position: 'center',
 			    buttons: [
-                	['<button><b>Nickname</b></button>', function (instance, toast) {
+                	['<button><b>'+nickname+'</b></button>', function (instance, toast) {
 			            instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
                         window.location.href = 'https://login.yimian.xyz/?require=nickname&from=https://user.yimian.xyz/';
 			        }, true],
-                	['<button><b>Tel</b></button>', function (instance, toast) {
+                	['<button><b>'+tel+'</b></button>', function (instance, toast) {
 			            instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
                         window.location.href = 'https://login.yimian.xyz/?require=tel&from=https://user.yimian.xyz/';
 			        }, true],
-                	['<button><b>Email</b></button>', function (instance, toast) {
+                	['<button><b>'+email+'</b></button>', function (instance, toast) {
 			            instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
                         window.location.href = 'https://login.yimian.xyz/?require=email&from=https://user.yimian.xyz/';
 			        }, true],
-			    ['<button><b>close</b></button>', function (instance, toast) {
+                	['<button><b>'+lan+'</b></button>', function (instance, toast) {
+			            instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                        session.del('lang');
+                        session.del('nolang');
+                        $('#lang').html('');
+			        }, true],
+			    ['<button><b>'+close+'</b></button>', function (instance, toast) {
 			            instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
 			        }, true],
 			    ]
