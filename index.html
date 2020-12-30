@@ -25,6 +25,8 @@
 				<p><strong><span class=".zh">手机号</span><span class=".en">Tel</span>: </strong><span id="tel"></span></p>
 				<p><strong><span class=".zh">分组</span><span class=".en">Group</span>: </strong><span id="group"></span></p>
 				<p><strong><span class=".zh">语言</span><span class=".en">Language</span>: </strong><span id="lang"></span></p>
+				<p><strong><span class=".zh">本设备fp指纹</span><span class=".en">fp of this device</span>: </strong><span id="fp"></span></p>
+				<p><strong><span class=".zh">设备</span><span class=".en">Devices</span>: </strong><span id="devices"></span></p>
 
 			</header>
 
@@ -49,15 +51,137 @@
 			<script src="https://cdn.yimian.xyz/ushio-user/assets/js/main.js"></script>
 			<script type="text/javascript" src="https://cdn.yimian.xyz/ushio-js/ushio-footer.min.js"></script>
 			<script type="text/javascript">
-			session.onload(function(){
+            function findMost (arr) {
+                if (!arr.length) return [];
+                //if (arr.length === 1) return 1;
+                let res = {};
+                let arrr = [];
+                    // 遍历数组
+                    arr.forEach((item) => {
+                            res[item] ? res[item] += 1 : res[item] = 1;
+                        })
+                    Object.keys(res).forEach(ii=>{
+                            let ob = {};
+                            ob.name = ii;
+                            ob.num = res[ii];
+                            arrr.push(ob);      
+                    });
+                let o = arrr.sort(function(a, b){
+                    return b.num - a.num;
+                });
+                return o;
+            }
+
+			session.onload(async function(){
 				$('#nickname').html(session.get('nickname'));
 				$('#uid').html(session.get('uid'));
 				$('#tel').html(session.get('tel'));
 				$('#email').html(session.get('email'));
 				$('#group').html(session.get('group'));
+				$('#fp').html(await fp);
 				$('#lang').html(((session.get('lang'))?atob(session.get('lang')):''));
 				$('#update').show();
 				$('#logout').show();
+                $.get('https://auth.yimian.xyz/getOnlineDevices.php?hash='+session.get('hash'), function(res){
+                    var devicess = '';
+                    var events = [];
+                    var f;
+                    for(var item of res){
+                        if(page.tran.getLang() == 'zh'){
+                        devicess += ' <button id="DEV'+item.fp+'">'+item.fp+'</button>';
+                        events.push(item);
+                        f = function(item){$('#DEV'+item.fp).click(function(){
+                            var totalSession = 0;
+                            var domains = [];
+                            for(var l of item.log){
+                                if(l.sessiontime){
+                                    totalSession += Number(l.sessiontime);
+                                }
+                                domains.push(l.domain);
+                            }
+                            var domainss = '';
+                            domains = findMost(domains);
+                            for(var i of domains){
+                                domainss += i.name+'('+i.num+') ';        
+                            };
+                            tips.question({
+                                timeout: 20000,
+                                close: false,
+                                overlay: true,
+                                displayMode: 'once',
+                                //id: 'question',
+                                zindex: 999,
+                                title: '设备管理',
+                                message: '<b>fp: </b>'+item.fp+'<br><b>ip: </b>'+item.ip+'<br><b>初次登录: </b>'+new Date(item.created_at+' UTC').toLocaleString()+'<br><b>最近登录: </b>'+new Date(item.updated_at+' UTC').toLocaleString()+'<br><b>最近访问: </b>'+new Date(item.log[item.log.length-1].timestamp+' UTC').toLocaleString()+'<br><b>设备类型: </b>'+item.log[item.log.length-1].platform+'<br><b>时区: </b>'+item.log[item.log.length-1].timezone+'<br><b>总访问次数: </b>'+item.log.length+'<br><b>总访问时长: </b>'+Math.ceil(+totalSession/60)+'分钟<br><b>访问站点: </b>'+domainss,
+                                position: 'center',
+                                buttons: [
+                                    ['<button><b>登出这台设备</b></button>', function (instance, toast) {
+                                        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                                        $.get('https://auth.yimian.xyz/logoutDevices.php?hash='+session.get('hash')+'&token='+item.token, function(res){
+                                            if(res.status){
+                                                alert('设备解绑成功！');
+                                                window.location.reload();
+                                            }        
+                                        }); 
+                                    }, true],
+                               ['<button><b>关闭</b></button>', function (instance, toast) {
+                                        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                                    }, true],
+                                ]
+                            });
+                        });
+                        }
+                        }else{
+                         devicess += ' <button id="DEV'+item.fp+'">'+item.fp+'</button>';
+                        events.push(item);
+                        f = function(item){$('#DEV'+item.fp).click(function(){
+                            var totalSession = 0;
+                            var domains = [];
+                            for(var l of item.log){
+                                if(l.sessiontime){
+                                    totalSession += Number(l.sessiontime);
+                                }
+                                domains.push(l.domain);
+                            }
+                            var domainss = '';
+                            domains = findMost(domains);
+                            for(var i of domains){
+                                domainss += i.name+'('+i.num+') ';        
+                            };
+                            tips.question({
+                                timeout: 20000,
+                                close: false,
+                                overlay: true,
+                                displayMode: 'once',
+                                //id: 'question',
+                                zindex: 999,
+                                title: 'Device Mangement',
+                                message: '<b>fp: </b>'+item.fp+'<br><b>ip: </b>'+item.ip+'<br><b>Created_at: </b>'+new Date(item.created_at+' UTC').toLocaleString()+'<br><b>Last_Login: </b>'+new Date(item.updated_at+' UTC').toLocaleString()+'<br><b>Last_Visit: </b>'+new Date(item.log[item.log.length-1].timestamp+' UTC').toLocaleString()+'<br><b>Platform: </b>'+item.log[item.log.length-1].platform+'<br><b>Timezome: </b>'+item.log[item.log.length-1].timezone+'<br><b>Visit Times: </b>'+item.log.length+'<br><b>Total Session: </b>'+Math.ceil(+totalSession/60)+'mins<br><b>Visit History: </b>'+domainss,
+                                position: 'center',
+                                buttons: [
+                                    ['<button><b>Unregister</b></button>', function (instance, toast) {
+                                        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                                        $.get('https://auth.yimian.xyz/logoutDevices.php?hash='+session.get('hash')+'&token='+item.token, function(res){
+                                            if(res.status){
+                                                alert('Unregister successfully！');
+                                                window.location.reload();
+                                            }        
+                                        }); 
+                                    }, true],
+                               ['<button><b>Close</b></button>', function (instance, toast) {
+                                        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                                    }, true],
+                                ]
+                            });
+                        });
+                        }
+                        
+                        }
+                    };
+
+                    $('#devices').html(devicess);
+                    events.forEach(i=>f(i));
+                });
 			});
 
 
