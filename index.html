@@ -237,6 +237,14 @@
 			});
           });
 
+    session.onload(function(){
+				$('#nickname').html(session.get('nickname'));
+				$('#uid').html(session.get('uid'));
+				$('#tel').html(session.get('tel'));
+				$('#email').html(session.get('email'));
+				$('#group').html(session.get('group'));
+				$('#lang').html(((session.get('lang'))?atob(session.get('lang')):''));
+    }, false, true);
 		</script>
 	</body>
 </html>
